@@ -39,7 +39,7 @@ def install_args
       "--with-openssl=" + Formula.factory('openssl').opt_prefix.to_s,
       "--with-imap=#{Formula.factory('imap-uw').opt_prefix}",
       "--with-imap-ssl=#{Formula.factory('imap-uw').opt_prefix}",
-      "--with-kerberos"
+      "--with-kerberos",
       "--with-kerberos=/usr",
       "--with-gd",
       "--enable-gd-native-ttf",
