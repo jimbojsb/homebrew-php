@@ -1,6 +1,6 @@
 require 'formula'
 
-class Php54 < Formula
+class Php < Formula
   init
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
   sha1 'f34a01fd3af20f19aae1788760e089d987ded15b'
