@@ -1,22 +1,32 @@
 require 'formula'
+require 'net/http'
 
 class Php < Formula
-  init
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
-  sha1 'f34a01fd3af20f19aae1788760e089d987ded15b'
+  sha1 '08d914996ae832e027b37f6a709cd9e04209c005'
+  homepage 'http://php.net/'
   version '5.4.14'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
   depends_on 'libxml2'
+  depends_on 'homebrew/dupes/zlib'
+  depends_on 'jpeg'
+  depends_on 'libpng'
+  depends_on 'freetype'
+  depends_on 'imap-uw'
+  depends_on 'curl'
+  depends_on 'libvpx'
+  depends_on 'autoconf'
 
+  option 'with-wipe-config', "Kill all existing config files"
 
 def install_args
     args = [
       "--prefix=#{prefix}",
       "--localstatedir=#{var}",
-      "--sysconfdir=#{config_path}",
-      "--with-config-file-path=#{config_path}",
+      "--sysconfdir=#{etc}",
+      "--with-config-file-path=#{etc}",
       "--with-iconv-dir=/usr",
       "--enable-exif",
       "--enable-soap",
@@ -46,34 +56,40 @@ def install_args
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
-      "--with-gettext=#{Formula.factory('gettext').opt_prefix}",
       "--mandir=#{man}",
     ]
     args
   end
 
   def install
+
+    if build.with? 'wipe-config'
+      File.delete(etc+"php.ini") unless !File.exists? etc+"php.ini"
+      File.delete(etc+"php-cli.ini") unless !File.exists? etc+"php-cli.ini"
+      File.delete(etc+"php-fpm.conf") unless !File.exists? etc+"php-fpm.conf"
+    end
+
+    plist_path.write php_fpm_startup_plist
+    plist_path.chmod 0644
+
+    install_xquartz
+
     args = install_args
-
-    (prefix+'var/log').mkpath
-    touch prefix+'var/log/php-fpm.log'
-    (prefix+"homebrew.mxcl.php-fpm.plist").write php_fpm_startup_plist
-    (prefix+"homebrew.mxcl.php-fpm.plist").chmod 0644
-
     system "./configure", *args
-
     system "make"
     ENV.deparallelize # parallel install fails on some systems
     system "make install"
 
-    config_path.install "./php.ini-development" => "php.ini" unless File.exists? config_path+"php.ini"
+    etc.install "./php.ini-development" => "php.ini" unless File.exists? etc+"php.ini"
+    (etc+'php-fpm.conf').write php_fpm_conf unless File.exists? etc+"php-fpm.conf"
+    (etc+'php-fpm.conf').chmod 0644
 
     chmod_R 0775, lib+"php"
 
-    system bin+"pear", "config-set", "php_ini", config_path+"php.ini" unless skip_pear_config_set?
+    system bin+"pear", "config-set", "php_ini", etc+"php.ini"
 
-    (config_path+"php-fpm.conf").write php_fpm_conf
-    (config_path+"php-fpm.conf").chmod 0644
+    install_mongo
+    fix_conf
   end
 
   def php_fpm_startup_plist; <<-EOPLIST.undent
@@ -84,12 +100,12 @@ def install_args
         <key>KeepAlive</key>
         <true/>
         <key>Label</key>
-        <string>homebrew.mcxl.php-fpm</string>
+        <string>homebrew.mcxl.php</string>
         <key>ProgramArguments</key>
         <array>
           <string>#{sbin}/php-fpm</string>
           <string>--fpm-config</string>
-          <string>#{config_path}/php-fpm.conf</string>
+          <string>#{etc}/php-fpm.conf</string>
         </array>
         <key>RunAtLoad</key>
         <true/>
@@ -99,8 +115,6 @@ def install_args
         <string>#{`whoami`.chomp}</string>
         <key>WorkingDirectory</key>
         <string>#{var}</string>
-        <key>StandardErrorPath</key>
-        <string>#{prefix}/var/log/php-fpm.log</string>
       </dict>
       </plist>
       EOPLIST
@@ -108,8 +122,8 @@ def install_args
 
   def php_fpm_conf; <<-EOCONF.undent
       [global]
-      pid = #{prefix}/var/run/php-fpm.pid
-      error_log = #{prefix}var/log/php/php-fpm.log
+      pid = #{var}/run/php-fpm.pid
+      error_log = #{var}/log/php/php-fpm.log
       daemonize = no
        
       [www]
@@ -122,4 +136,52 @@ def install_args
       pm.max_spare_servers = 3
     EOCONF
   end
+
+  def install_xquartz
+    return if File.directory?("/opt/X11")
+    puts "downloading xquartz"
+    Net::HTTP.start('xquartz.macosforge.org') {
+      |http|
+      resp = http.get("/downloads/SL/XQuartz-2.7.4.dmg")
+      open("/tmp/xquartz.dmg", "wb") {
+        |file|
+        file.write(resp.body)
+      }
+    }
+    puts "installing xquartz"
+    `hdiutil attach /tmp/xquartz.dmg`
+    `sudo /usr/sbin/installer -pkg /Volumes/XQuartz-2.7.4/XQuartz.pkg -target /`
+    puts "cleaning up xquartz"
+    `hdituil detach /Volumes/XQuartz-2.7.4`
+    `rm -fR /tmp/xquartz.dmg`
+    puts "done with xquartz"
+  end
+
+  def install_imagick
+
+  end
+
+  def install_mongo
+    system bin+"pecl", "install", "mongo"
+  end
+
+  def install_markdown
+
+  end
+
+  def install_aop
+
+  end
+
+  def fix_conf
+    if build.with? "wipe-config"
+      inreplace (etc+"php.ini") do |s|
+        s.gsub! "short_open_tag = Off", "short_open_tag = On"
+        s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
+        s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
+        s << "mongo.native_long=1\n"
+      end
+    end
+  end
+
 end
