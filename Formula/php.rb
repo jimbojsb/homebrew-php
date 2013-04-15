@@ -52,7 +52,7 @@ def install_args
     args
   end
 
-  def _install
+  def install
     args = install_args
 
     (prefix+'var/log').mkpath
