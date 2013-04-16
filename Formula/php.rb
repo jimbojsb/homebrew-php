@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
   sha1 '08d914996ae832e027b37f6a709cd9e04209c005'
   homepage 'http://php.net/'
-  version '5.4.14'
+  version '5.4.14.02'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -18,10 +18,9 @@ class Php < Formula
   depends_on 'curl'
   depends_on 'libvpx'
   depends_on 'autoconf'
+  depends_on 'imagemagick'
 
-  option 'with-wipe-config', "Kill all existing config files"
-
-def install_args
+  def install_args
     args = [
       "--prefix=#{prefix}",
       "--localstatedir=#{var}",
@@ -33,6 +32,7 @@ def install_args
       "--enable-wddx",
       "--enable-ftp",
       "--enable-sockets",
+      "--with-bz2",
       "--enable-zip",
       "--enable-pcntl",
       "--enable-mbstring",
@@ -56,40 +56,42 @@ def install_args
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
-      "--mandir=#{man}",
+      "--mandir=#{man}"
     ]
     args
   end
 
   def install
 
-    if build.with? 'wipe-config'
-      File.delete(etc+"php.ini") unless !File.exists? etc+"php.ini"
-      File.delete(etc+"php-cli.ini") unless !File.exists? etc+"php-cli.ini"
-      File.delete(etc+"php-fpm.conf") unless !File.exists? etc+"php-fpm.conf"
-    end
-
-    plist_path.write php_fpm_startup_plist
-    plist_path.chmod 0644
+    File.delete(etc+"php.ini") unless !File.exists? etc+"php.ini"
+    File.delete(etc+"php-cli.ini") unless !File.exists? etc+"php-cli.ini"
+    File.delete(etc+"php-fpm.conf") unless !File.exists? etc+"php-fpm.conf"
 
     install_xquartz
 
     args = install_args
     system "./configure", *args
-    system "make"
+    system "make", "-j4"
     ENV.deparallelize # parallel install fails on some systems
     system "make install"
 
     etc.install "./php.ini-development" => "php.ini" unless File.exists? etc+"php.ini"
     (etc+'php-fpm.conf').write php_fpm_conf unless File.exists? etc+"php-fpm.conf"
     (etc+'php-fpm.conf').chmod 0644
+    plist_path.write php_fpm_startup_plist
+    plist_path.chmod 0644
+
+    install_mongo
+    install_markdown
+    install_aop
+    install_xdebug
+    install_apc
+    install_imagick
+    install_composer
+    fix_conf
 
     chmod_R 0775, lib+"php"
 
-    system bin+"pear", "config-set", "php_ini", etc+"php.ini"
-
-    install_mongo
-    fix_conf
   end
 
   def php_fpm_startup_plist; <<-EOPLIST.undent
@@ -134,6 +136,16 @@ def install_args
       pm.start_servers = 2
       pm.min_spare_servers = 1
       pm.max_spare_servers = 3
+
+      [www-debug]
+      user = #{`whoami`.chomp}
+      listen = /tmp/php-fpm-debug.sock
+      pm = dynamic
+      pm.max_children = 5
+      pm.start_servers = 2
+      pm.min_spare_servers = 1
+      pm.max_spare_servers = 3
+      php_admin_value[xdebug.remote_autostart]=1
     EOCONF
   end
 
@@ -158,30 +170,74 @@ def install_args
   end
 
   def install_imagick
-
-  end
-
-  def install_mongo
-    system bin+"pecl", "install", "mongo"
-  end
-
-  def install_markdown
-
-  end
-
-  def install_aop
-
-  end
-
-  def fix_conf
-    if build.with? "wipe-config"
-      inreplace (etc+"php.ini") do |s|
-        s.gsub! "short_open_tag = Off", "short_open_tag = On"
-        s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
-        s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
-        s << "mongo.native_long=1\n"
-      end
+    system "#{bin}/pecl", "install", "imagick-beta"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=imagick.so\n"
     end
   end
 
+  def install_mongo
+    system "#{bin}/pecl", "install", "mongo"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=mongo.so\n"
+      s << "mongo.native_long=1\n"
+    end
+  end
+
+  def install_aop
+    system "#{bin}/pecl", "install", "aop-beta"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=aop.so\n"
+    end
+  end
+
+  def install_markdown
+    system "#{bin}/pecl", "install", "markdown"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=discount.so\n"
+    end
+  end 
+
+  def install_apc
+    system "#{bin}/pecl", "install", "apc-beta"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=apc.so\n"
+    end
+  end 
+
+  def install_xdebug
+    system "#{bin}/pecl", "install", "xdebug"
+    inreplace (etc+"php.ini") do |s|
+      s << "zend_extension=#{lib}/extensions/no-debug-non-zts-20100525/xdebug.so\n"
+      s << "xdebug.remote_host=localhost\n"
+      s << "xdebug.remote_enable=1\n"
+    end
+    inreplace (File.expand_path("~")+"/.bash_profile") do |s|
+      s << 'alias phpd=php -d xdebug.remote_autostart=1'
+    end
+  end
+
+
+  def fix_conf
+    inreplace (etc+"php.ini") do |s|
+      s.gsub! "short_open_tag = Off", "short_open_tag = On"
+      s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
+      s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
+      s.gsub! "memory_limit = 128M", "memory_limit = 512M"
+    end
+    `cp #{etc}/php.ini #{etc}/php-cli.ini`
+    inreplace (etc+"php-cli.ini") do |s|
+      s.gsub! "memory_limit = 128M", "memory_limit = -1"
+    end
+
+  end
+
+  def install_composer
+    if File.exists?("#{HOMEBREW_PREFIX}/bin/composer")
+      `#{HOMEBREW_PREFIX}/bin/composer selfupdate`
+    else
+      `curl -sS https://getcomposer.org/installer | #{bin}/php`
+      `mv composer.phar #{HOMEBREW_PREFIX}/bin/composer`
+    end
+  end
 end
