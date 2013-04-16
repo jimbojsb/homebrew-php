@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
   sha1 '08d914996ae832e027b37f6a709cd9e04209c005'
   homepage 'http://php.net/'
-  version '5.4.14.05'
+  version '5.4.14.06'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -53,19 +53,10 @@ class Php < Formula
       "--with-kerberos",
       "--with-kerberos=/usr",
       "--with-gd",
-      "--with-pear=#{lib}",
       "--enable-gd-native-ttf",
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
-      "--mandir=#{man}"
-    ]
-    args = [
-      "--prefix=#{prefix}",
-      "--localstatedir=#{var}",
-      "--sysconfdir=#{etc}",
-      "--with-config-file-path=#{etc}",
-      "--enable-fpm",
       "--mandir=#{man}"
     ]
     args
@@ -73,9 +64,9 @@ class Php < Formula
 
   def install
 
-    File.delete(etc+"php.ini")
-    File.delete(etc+"php-cli.ini")
-    File.delete(etc+"php-fpm.conf")
+    File.delete(etc+"php.ini") rescue nil
+    File.delete(etc+"php-cli.ini") rescue nil
+    File.delete(etc+"php-fpm.conf") rescue nil
     `rm -fR #{HOMEBREW_PREFIX}/lib/php`
 
     install_xquartz
@@ -85,8 +76,8 @@ class Php < Formula
     system "make"
     system "make install"
 
-    etc.install "./php.ini-development" => "php.ini" unless File.exists? etc+"php.ini"
-    (etc+'php-fpm.conf').write php_fpm_conf unless File.exists? etc+"php-fpm.conf"
+    etc.install "./php.ini-development" => "php.ini"
+    (etc+'php-fpm.conf').write php_fpm_conf
     (etc+'php-fpm.conf').chmod 0644
     plist_path.write php_fpm_startup_plist
     plist_path.chmod 0644
@@ -98,6 +89,8 @@ class Php < Formula
     install_imagick
     install_composer
     fix_conf
+
+    `chmod -R 755 #{lib}`
 
   end
 
@@ -179,7 +172,7 @@ class Php < Formula
 
   def install_imagick
     ohai "installing imagick"  
-    `#{bin}/pecl install imagick-beta`
+    `yes | #{bin}/pecl install imagick-beta`
     inreplace (etc+"php.ini") do |s|
       s << "extension=imagick.so\n"
     end
@@ -212,7 +205,7 @@ class Php < Formula
 
   def install_apc
     ohai "installing apc"  
-    `#{bin}/pecl install apc-beta`
+    `yes | #{bin}/pecl install apc-beta`
     inreplace (etc+"php.ini") do |s|
       s << "extension=apc.so\n"
     end
@@ -222,14 +215,13 @@ class Php < Formula
     ohai "installing xdebug"
     `#{bin}/pecl install xdebug`
     inreplace (etc+"php.ini") do |s|
-      s << "zend_extension=#{lib}/extensions/no-debug-non-zts-20100525/xdebug.so\n"
+      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20100525/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
       s << "xdebug.remote_enable=1\n"
     end
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-      command = 'alias phpd="php -d xdebug.remote_autostart=1"' + "\n"
-      s.gsub! command, ""
-      s << command
+      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", ""
+      s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
     end
   end
 
