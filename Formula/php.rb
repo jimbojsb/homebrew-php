@@ -91,7 +91,6 @@ class Php < Formula
     install_composer
     fix_conf
 
-    chmod_R 0775, lib+"php"
 
   end
 
@@ -228,7 +227,7 @@ class Php < Formula
     end
     `cp #{etc}/php.ini #{etc}/php-cli.ini`
     inreplace (etc+"php-cli.ini") do |s|
-      s.gsub! "memory_limit = 128M", "memory_limit = -1"
+      s.gsub! "memory_limit = 512", "memory_limit = -1"
     end
 
   end
