@@ -40,7 +40,7 @@ class Php < Formula
       "--enable-mbregex",
       "--enable-bcmath",
       "--enable-calendar",
-      "--with-zlib=#{Formula.factory('zlib').opt_prefix}",
+      "--with-zlib=#{Formula.factory('homebrew/dupes/zlib').opt_prefix}",
       "--with-xmlrpc",
       "--with-mysqli=mysqlnd",
       "--with-mysql=mysqlnd",
