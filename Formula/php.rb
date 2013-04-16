@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
   sha1 '08d914996ae832e027b37f6a709cd9e04209c005'
   homepage 'http://php.net/'
-  version '5.4.14.03'
+  version '5.4.14.05'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -53,10 +53,19 @@ class Php < Formula
       "--with-kerberos",
       "--with-kerberos=/usr",
       "--with-gd",
+      "--with-pear=#{lib}",
       "--enable-gd-native-ttf",
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
+      "--mandir=#{man}"
+    ]
+    args = [
+      "--prefix=#{prefix}",
+      "--localstatedir=#{var}",
+      "--sysconfdir=#{etc}",
+      "--with-config-file-path=#{etc}",
+      "--enable-fpm",
       "--mandir=#{man}"
     ]
     args
@@ -64,16 +73,16 @@ class Php < Formula
 
   def install
 
-    File.delete(etc+"php.ini") unless !File.exists? etc+"php.ini"
-    File.delete(etc+"php-cli.ini") unless !File.exists? etc+"php-cli.ini"
-    File.delete(etc+"php-fpm.conf") unless !File.exists? etc+"php-fpm.conf"
+    File.delete(etc+"php.ini")
+    File.delete(etc+"php-cli.ini")
+    File.delete(etc+"php-fpm.conf")
+    `rm -fR #{HOMEBREW_PREFIX}/lib/php`
 
     install_xquartz
 
     args = install_args
     system "./configure", *args
-    system "make", "-j4"
-    ENV.deparallelize # parallel install fails on some systems
+    system "make"
     system "make install"
 
     etc.install "./php.ini-development" => "php.ini" unless File.exists? etc+"php.ini"
@@ -82,17 +91,17 @@ class Php < Formula
     plist_path.write php_fpm_startup_plist
     plist_path.chmod 0644
 
-    install_mongo
+    install_xdebug
     install_markdown
     install_aop
-    install_xdebug
     install_apc
     install_imagick
     install_composer
     fix_conf
 
-
   end
+
+
 
   def php_fpm_startup_plist; <<-EOPLIST.undent
       <?xml version="1.0" encoding="UTF-8"?>
@@ -151,7 +160,7 @@ class Php < Formula
 
   def install_xquartz
     return if File.directory?("/opt/X11")
-    puts "downloading xquartz"
+    ohai "downloading xquartz"
     Net::HTTP.start('xquartz.macosforge.org') {
       |http|
       resp = http.get("/downloads/SL/XQuartz-2.7.4.dmg")
@@ -160,24 +169,25 @@ class Php < Formula
         file.write(resp.body)
       }
     }
-    puts "installing xquartz"
+    ohai "installing xquartz"
     `hdiutil attach /tmp/xquartz.dmg`
     `sudo /usr/sbin/installer -pkg /Volumes/XQuartz-2.7.4/XQuartz.pkg -target /`
-    puts "cleaning up xquartz"
+    ohai "cleaning up xquartz"
     `hdituil detach /Volumes/XQuartz-2.7.4`
     `rm -fR /tmp/xquartz.dmg`
-    puts "done with xquartz"
   end
 
   def install_imagick
-    system "#{bin}/pecl", "install", "imagick-beta"
+    ohai "installing imagick"  
+    `#{bin}/pecl install imagick-beta`
     inreplace (etc+"php.ini") do |s|
       s << "extension=imagick.so\n"
     end
   end
 
   def install_mongo
-    system "#{bin}/pecl", "install", "mongo"
+    ohai "installing mongo"  
+    `#{bin}/pecl install mongo`
     inreplace (etc+"php.ini") do |s|
       s << "extension=mongo.so\n"
       s << "mongo.native_long=1\n"
@@ -185,35 +195,41 @@ class Php < Formula
   end
 
   def install_aop
-    system "#{bin}/pecl", "install", "aop-beta"
+    ohai "installing aop"  
+    `#{bin}/pecl install aop-beta`
     inreplace (etc+"php.ini") do |s|
       s << "extension=aop.so\n"
     end
   end
 
   def install_markdown
-    system "#{bin}/pecl", "install", "markdown"
+    ohai "installing markdown"  
+    `#{bin}/pecl install markdown`
     inreplace (etc+"php.ini") do |s|
       s << "extension=discount.so\n"
     end
   end 
 
   def install_apc
-    system "#{bin}/pecl", "install", "apc-beta"
+    ohai "installing apc"  
+    `#{bin}/pecl install apc-beta`
     inreplace (etc+"php.ini") do |s|
       s << "extension=apc.so\n"
     end
   end 
 
   def install_xdebug
-    system "#{bin}/pecl", "install", "xdebug"
+    ohai "installing xdebug"
+    `#{bin}/pecl install xdebug`
     inreplace (etc+"php.ini") do |s|
       s << "zend_extension=#{lib}/extensions/no-debug-non-zts-20100525/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
       s << "xdebug.remote_enable=1\n"
     end
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-      s << 'alias phpd=php -d xdebug.remote_autostart=1'
+      command = 'alias phpd="php -d xdebug.remote_autostart=1"' + "\n"
+      s.gsub! command, ""
+      s << command
     end
   end
 
