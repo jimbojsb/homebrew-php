@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
   sha1 '08d914996ae832e027b37f6a709cd9e04209c005'
   homepage 'http://php.net/'
-  version '5.4.14.02'
+  version '5.4.14.03'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -19,6 +19,7 @@ class Php < Formula
   depends_on 'libvpx'
   depends_on 'autoconf'
   depends_on 'imagemagick'
+  depends_on 'pkg-config' => :build
 
   def install_args
     args = [
