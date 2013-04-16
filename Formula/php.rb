@@ -126,8 +126,6 @@ class Php < Formula
 
   def php_fpm_conf; <<-EOCONF.undent
       [global]
-      pid = #{var}/run/php-fpm.pid
-      error_log = #{var}/log/php/php-fpm.log
       daemonize = no
        
       [www]
@@ -220,7 +218,7 @@ class Php < Formula
       s << "xdebug.remote_enable=1\n"
     end
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", ""
+      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
       s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
     end
   end
