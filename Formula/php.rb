@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us1.php.net/get/php-5.4.14.tar.gz/from/this/mirror'
   sha1 '08d914996ae832e027b37f6a709cd9e04209c005'
   homepage 'http://php.net/'
-  version '5.4.14.07'
+  version '5.4.14.08'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -85,9 +85,9 @@ class Php < Formula
     install_xdebug
     install_markdown
     install_aop
-    install_apc
     install_imagick
     install_composer
+    install_mongo
     fix_conf
 
     `chmod -R 755 #{lib}`
@@ -201,14 +201,6 @@ class Php < Formula
     end
   end 
 
-  def install_apc
-    ohai "installing apc"  
-    `yes | #{bin}/pecl install apc-beta`
-    inreplace (etc+"php.ini") do |s|
-      s << "extension=apc.so\n"
-    end
-  end 
-
   def install_xdebug
     ohai "installing xdebug"
     `#{bin}/pecl install xdebug`
@@ -228,7 +220,7 @@ class Php < Formula
     inreplace (etc+"php.ini") do |s|
       s.gsub! "short_open_tag = Off", "short_open_tag = On"
       s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
-      s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
+      s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRECATED | E_STRICT)"
       s.gsub! "memory_limit = 128M", "memory_limit = 512M"
     end
     `cp #{etc}/php.ini #{etc}/php-cli.ini`
