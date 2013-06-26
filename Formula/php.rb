@@ -2,7 +2,7 @@ require 'formula'
 require 'net/http'
 
 class Php < Formula
-  url 'http://www.php.net/get/php-5.4.16.tar.gz/from/a/mirror'
+  url 'http://us3.php.net/get/php-5.4.16.tar.gz/from/this/mirror'
   sha1 'e7a9e798821fa186ae297392353be8f1d3de6edd'
   homepage 'http://php.net/'
   version '5.4.16.01'
