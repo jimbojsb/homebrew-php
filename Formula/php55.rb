@@ -208,7 +208,6 @@ class Php < Formula
       s << "xdebug.remote_host=localhost\n"
       s << "xdebug.remote_enable=1\n"
     end
-    end
     `cp #{etc}/php.ini #{etc}/php-cli.ini`
     inreplace (etc+"php-cli.ini") do |s|
       s.gsub! "memory_limit = 512", "memory_limit = -1"
