@@ -1,7 +1,7 @@
 require 'formula'
 require 'net/http'
 
-class Php < Formula
+class Php55 < Formula
   url 'http://us3.php.net/get/php-5.5.0.tar.gz/from/us1.php.net/mirror'
   sha1 '26bd47661f38315ecf2124655ad6d97b0f0b06af'
   homepage 'http://php.net/'
