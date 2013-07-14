@@ -58,6 +58,7 @@ class Php55 < Formula
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
+      "--enable-aop",
       "--mandir=#{man}"
     ]
     args
@@ -75,6 +76,8 @@ class Php55 < Formula
     get_extensions
 
     args = install_args
+    File.delete("configure")
+    system "./buildconf --force"
     system "./configure", *args
     system "make"
     system "make install"
