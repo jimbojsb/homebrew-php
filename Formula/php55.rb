@@ -58,7 +58,6 @@ class Php55 < Formula
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
-      "--enable-AOP",
       "--enable-mongo",
       "--enable-discount",
       "--with-imagick",
