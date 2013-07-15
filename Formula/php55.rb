@@ -78,6 +78,8 @@ class Php55 < Formula
     args = install_args
     File.delete("configure")
     system "./buildconf --force"
+    system "./configure --help"
+    return
     system "./configure", *args
     system "make"
     system "make install"
