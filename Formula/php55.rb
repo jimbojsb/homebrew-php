@@ -60,8 +60,8 @@ class Php55 < Formula
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
       "--enable-AOP",
       "--enable-mongo",
-      "--enable-markdown"
-      "--with-imagick"
+      "--enable-markdown",
+      "--with-imagick",
       "--mandir=#{man}"
     ]
     args
