@@ -58,7 +58,10 @@ class Php55 < Formula
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
-      "--enable-aop",
+      "--enable-AOP",
+      "--enable-mongo",
+      "--enable-markdown"
+      "--with-imagick"
       "--mandir=#{man}"
     ]
     args
@@ -172,29 +175,28 @@ class Php55 < Formula
     `rm -fR /tmp/xquartz.dmg`
   end
 
-  def install_imagick
-    ohai "installing imagick"  
-    `yes | #{bin}/pecl install imagick-beta`
-  end
-
-  def install_mongo
-    ohai "installing mongo"  
-    `#{bin}/pecl install mongo`
-  end
-
   def get_extensions
-    ohai "installing aop"  
+    ohai "getting aop"  
     system 'wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && mv AOP-0.2.2b1 ext/aop'
+
+    ohai "getting mongo"  
+    system 'wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && mv mongo-1.4.1 ext/mongo'
+
+    ohai "getting markdown"  
+    system 'wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && mv markdown-1.0.0 ext/markdown'
+
+    ohai "getting imagick"
+    system 'wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && mv imagick-3.1.0RC2 ext/imagick'
+    ohai "patching imagick"
+    inreplace ("ext/imagick/config.m4") do |s|
+      s.gsub! "include/ImageMagick", "include/ImageMagick-6"
+    end
   end
 
-  def install_markdown
-    ohai "installing markdown"  
-    `#{bin}/pecl install markdown`
-  end 
 
   def install_xdebug
     ohai "installing xdebug"
-    `#{bin}/pecl install xdebug`
+    #system 'wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && ' + bin + '/phpize && ./configure && make && cp modules/xdebug.so ' + lib + '/php/extensions/no-debug-non-zts-20100525'
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
       s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
       s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
