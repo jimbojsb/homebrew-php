@@ -2,10 +2,10 @@ require 'formula'
 require 'net/http'
 
 class Php55 < Formula
-  url 'http://us3.php.net/get/php-5.5.0.tar.gz/from/us1.php.net/mirror'
-  sha1 '26bd47661f38315ecf2124655ad6d97b0f0b06af'
+  url 'http://us2.php.net/get/php-5.5.1.tar.gz/from/us1.php.net/mirror'
+  md5 'a7d9598c0e60b47960b8e803e51c4309'
   homepage 'http://php.net/'
-  version '5.5.0.01'
+  version '5.5.1.01'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -172,7 +172,7 @@ class Php55 < Formula
 
   def install_extensions
     ohai "isntalling aop"  
-    system 'wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && cd AOP-0.2.2b1 && #{bin}/phpize && ./configure && make && cp modules/aop.so #{lib}/php/extensions/no-debug-non-zts-20121212'
+    system "wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && cd AOP-0.2.2b1 && #{bin}/phpize && ./configure && make && cp modules/aop.so #{lib}/php/extensions/no-debug-non-zts-20121212"
 
     #ohai "getting mongo"  
     #system 'wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && mv mongo-1.4.1 ext/mongo'
