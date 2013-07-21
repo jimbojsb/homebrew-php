@@ -87,13 +87,16 @@ class Php55 < Formula
     (etc+'php-fpm.conf').chmod 0644
     plist_path.write php_fpm_startup_plist
     plist_path.chmod 0644
+   
+    set_ini_defaults
 
+    system "chmod -R 755 #{lib}"
+
+  end
+
+  def post_install
     install_extensions
     install_composer
-    fix_conf
-
-    `chmod -R 755 #{lib}`
-
   end
 
 
@@ -186,41 +189,38 @@ class Php55 < Formula
     #inreplace ("ext/imagick/config.m4") do |s|
     #  s.gsub! "include/ImageMagick", "include/ImageMagick-6"
     #end
-  end
 
+     #ohai "activating extensions"
+     # s << "mongo.native_long=1\n"
+     # s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
+     # s << "xdebug.remote_host=localhost\n"
+     # s << "xdebug.remote_enable=1\n"
+     # s << "extension=aop.so\n"
+     # s << "extension=mongo.so\n"
+     # s << "extension=discount.so\n"
+     # s << "extension=imagick.so\n"
 
-  def install_xdebug
-    ohai "installing xdebug"
+     #     ohai "installing xdebug"
     #system 'wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && ' + bin + '/phpize && ./configure && make && cp modules/xdebug.so ' + lib + '/php/extensions/no-debug-non-zts-20100525'
-    inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
-      s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
-    end
+    #inreplace (File.expand_path("~")+"/.bash_profile") do |s|
+     # s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
+     # s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
+    #end
   end
 
-
-  def fix_conf
+  def set_ini_defaults
     inreplace (etc+"php.ini") do |s|
       ohai "setting defaults"
       s.gsub! "short_open_tag = Off", "short_open_tag = On"
       s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
       s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
       s.gsub! "memory_limit = 128M", "memory_limit = 512M"
-      ohai "activating extensions"
-      s << "mongo.native_long=1\n"
-      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
-      s << "xdebug.remote_host=localhost\n"
-      s << "xdebug.remote_enable=1\n"
-      s << "extension=aop.so\n"
-      s << "extension=mongo.so\n"
-      s << "extension=discount.so\n"
-      s << "extension=imagick.so\n"
     end
-    `cp #{etc}/php.ini #{etc}/php-cli.ini`
+
+    system "cp #{etc}/php.ini #{etc}/php-cli.ini"
     inreplace (etc+"php-cli.ini") do |s|
       s.gsub! "memory_limit = 512", "memory_limit = -1"
     end
-
   end
 
   def install_composer
