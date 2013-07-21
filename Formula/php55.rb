@@ -3,7 +3,7 @@ require 'net/http'
 
 class Php55 < Formula
   url 'http://us2.php.net/get/php-5.5.1.tar.gz/from/us1.php.net/mirror'
-  md5 'a7d9598c0e60b47960b8e803e51c4309'
+  sha1 '401978b63c9900b8b33e1b70ee2c162e636dbf42'
   homepage 'http://php.net/'
   version '5.5.1.01'
 
@@ -197,7 +197,7 @@ class Php55 < Formula
       s << "extension=discount.so\n"
       s << "extension=imagick.so\n"
     end
-    
+
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
       s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
       s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
