@@ -178,7 +178,7 @@ class Php55 < Formula
     system "wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR markdown-1.0.0*"
 
     ohai "installing imagick"
-    system "wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && cd imagick-3.1.0RC2 && sed -i '' 's/include\\/ImageMagick/include\\/ImageMagick-6/' config.m4 && autoconf --force && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR imagick-3.1.0RC2*"
+    system "wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && cd imagick-3.1.0RC2 && sed -i '' 's/include\\/ImageMagick/include\\/ImageMagick-6/' config.m4 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR imagick-3.1.0RC2*"
 
     ohai "installing xdebug"
     system "wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR xdebug-2.2.3*"
