@@ -196,7 +196,8 @@ class Php55 < Formula
       s << "extension=mongo.so\n"
       s << "extension=discount.so\n"
       s << "extension=imagick.so\n"
-
+    end
+    
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
       s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
       s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
