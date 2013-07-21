@@ -73,8 +73,6 @@ class Php55 < Formula
     install_xquartz
 
     args = install_args
-    File.delete("configure")
-    system "./buildconf --force"
     system "./configure", *args
     system "make"
     system "make install"
