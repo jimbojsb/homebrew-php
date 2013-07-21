@@ -58,9 +58,6 @@ class Php55 < Formula
       "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
       "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
       "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
-      "--enable-mongo",
-      "--enable-discount",
-      "--with-imagick",
       "--mandir=#{man}"
     ]
     args
@@ -174,38 +171,36 @@ class Php55 < Formula
   end
 
   def install_extensions
-    ohai "isntalling aop"  
-    system "wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && cd AOP-0.2.2b1 && #{bin}/phpize && ./configure && make && cp modules/aop.so #{lib}/php/extensions/no-debug-non-zts-20121212"
+    ohai "installing aop"  
+    system "wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && cd AOP-0.2.2b1 && #{bin}/phpize && ./configure && make && cp modules/aop.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR AOP-0.2.2b1*"
 
-    #ohai "getting mongo"  
-    #system 'wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && mv mongo-1.4.1 ext/mongo'
+    ohai "installing mongo"  
+    system "wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && cd mongo-1.4.1 && #{bin}/phpize && ./configure && make && cp modules/mongo.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR mongo-1.4.1*"
 
-    #ohai "getting markdown"  
-    #system 'wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && mv markdown-1.0.0 ext/markdown'
+    ohai "installing markdown"  
+    system "wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR markdown-1.0.0*"
 
-    #ohai "getting imagick"
-    #system 'wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && mv imagick-3.1.0RC2 ext/imagick'
-    #ohai "patching imagick"
-    #inreplace ("ext/imagick/config.m4") do |s|
-    #  s.gsub! "include/ImageMagick", "include/ImageMagick-6"
-    #end
+    ohai "installing imagick"
+    system "wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && cd imagick-3.1.0RC2 && sed -i 's/include\/ImageMagick/include\/ImageMagick-6/' config.m4 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR imagick-3.1.0RC2*"
 
-     #ohai "activating extensions"
-     # s << "mongo.native_long=1\n"
-     # s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
-     # s << "xdebug.remote_host=localhost\n"
-     # s << "xdebug.remote_enable=1\n"
-     # s << "extension=aop.so\n"
-     # s << "extension=mongo.so\n"
-     # s << "extension=discount.so\n"
-     # s << "extension=imagick.so\n"
+    ohai "installing xdebug"
+    system "wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR xdebug-2.2.3*"
 
-     #     ohai "installing xdebug"
-    #system 'wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && ' + bin + '/phpize && ./configure && make && cp modules/xdebug.so ' + lib + '/php/extensions/no-debug-non-zts-20100525'
-    #inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-     # s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
-     # s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
-    #end
+    ohai "activating extensions"
+    inreplace (etc+"php.ini") do |s|
+      s << "mongo.native_long=1\n"
+      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
+      s << "xdebug.remote_host=localhost\n"
+      s << "xdebug.remote_enable=1\n"
+      s << "extension=aop.so\n"
+      s << "extension=mongo.so\n"
+      s << "extension=discount.so\n"
+      s << "extension=imagick.so\n"
+
+    inreplace (File.expand_path("~")+"/.bash_profile") do |s|
+      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
+      s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
+    end
   end
 
   def set_ini_defaults
