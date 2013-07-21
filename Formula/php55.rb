@@ -83,14 +83,13 @@ class Php55 < Formula
     plist_path.write php_fpm_startup_plist
     plist_path.chmod 0644
    
-    set_ini_defaults
-
     system "chmod -R 755 #{lib}"
 
   end
 
   def post_install
     install_extensions
+    set_ini_defaults
     install_composer
   end
 
@@ -184,18 +183,6 @@ class Php55 < Formula
     ohai "installing xdebug"
     system "wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR xdebug-2.2.3*"
 
-    ohai "activating extensions"
-    inreplace (etc+"php.ini") do |s|
-      s << "mongo.native_long=1\n"
-      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
-      s << "xdebug.remote_host=localhost\n"
-      s << "xdebug.remote_enable=1\n"
-      s << "extension=aop.so\n"
-      s << "extension=mongo.so\n"
-      s << "extension=discount.so\n"
-      s << "extension=imagick.so\n"
-    end
-
     inreplace (File.expand_path("~")+"/.bash_profile") do |s|
       s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
       s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
@@ -209,6 +196,14 @@ class Php55 < Formula
       s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
       s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
       s.gsub! "memory_limit = 128M", "memory_limit = 512M"
+      s << "mongo.native_long=1\n"
+      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
+      s << "xdebug.remote_host=localhost\n"
+      s << "xdebug.remote_enable=1\n"
+      s << "extension=aop.so\n"
+      s << "extension=mongo.so\n"
+      s << "extension=discount.so\n"
+      s << "extension=imagick.so\n"
     end
 
     system "cp #{etc}/php.ini #{etc}/php-cli.ini"
