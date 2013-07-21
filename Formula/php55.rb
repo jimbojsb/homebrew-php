@@ -75,8 +75,6 @@ class Php55 < Formula
 
     install_xquartz
 
-    get_extensions
-
     args = install_args
     File.delete("configure")
     system "./buildconf --force"
@@ -90,8 +88,8 @@ class Php55 < Formula
     plist_path.write php_fpm_startup_plist
     plist_path.chmod 0644
 
-    #install_xdebug
-    #install_composer
+    install_extensions
+    install_composer
     fix_conf
 
     `chmod -R 755 #{lib}`
@@ -172,22 +170,22 @@ class Php55 < Formula
     `rm -fR /tmp/xquartz.dmg`
   end
 
-  def get_extensions
-    ohai "getting aop"  
-    system 'wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && mv AOP-0.2.2b1 ext/aop'
+  def install_extensions
+    ohai "isntalling aop"  
+    system 'wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && cd AOP-0.2.2b1 && #{bin}/phpize && ./configure && make && cp modules/aop.so #{lib}/php/extensions/no-debug-non-zts-20121212'
 
-    ohai "getting mongo"  
-    system 'wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && mv mongo-1.4.1 ext/mongo'
+    #ohai "getting mongo"  
+    #system 'wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && mv mongo-1.4.1 ext/mongo'
 
-    ohai "getting markdown"  
-    system 'wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && mv markdown-1.0.0 ext/markdown'
+    #ohai "getting markdown"  
+    #system 'wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && mv markdown-1.0.0 ext/markdown'
 
-    ohai "getting imagick"
-    system 'wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && mv imagick-3.1.0RC2 ext/imagick'
-    ohai "patching imagick"
-    inreplace ("ext/imagick/config.m4") do |s|
-      s.gsub! "include/ImageMagick", "include/ImageMagick-6"
-    end
+    #ohai "getting imagick"
+    #system 'wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && mv imagick-3.1.0RC2 ext/imagick'
+    #ohai "patching imagick"
+    #inreplace ("ext/imagick/config.m4") do |s|
+    #  s.gsub! "include/ImageMagick", "include/ImageMagick-6"
+    #end
   end
 
 
@@ -203,14 +201,20 @@ class Php55 < Formula
 
   def fix_conf
     inreplace (etc+"php.ini") do |s|
+      ohai "setting defaults"
       s.gsub! "short_open_tag = Off", "short_open_tag = On"
       s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
       s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
       s.gsub! "memory_limit = 128M", "memory_limit = 512M"
+      ohai "activating extensions"
       s << "mongo.native_long=1\n"
-      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20100525/xdebug.so\n"
+      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
       s << "xdebug.remote_enable=1\n"
+      s << "extension=aop.so\n"
+      s << "extension=mongo.so\n"
+      s << "extension=discount.so\n"
+      s << "extension=imagick.so\n"
     end
     `cp #{etc}/php.ini #{etc}/php-cli.ini`
     inreplace (etc+"php-cli.ini") do |s|
