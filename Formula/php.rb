@@ -69,8 +69,6 @@ class Php < Formula
     File.delete(etc+"php-fpm.conf") rescue nil
     `rm -fR #{HOMEBREW_PREFIX}/lib/php`
 
-    install_xquartz
-
     args = install_args
     system "./configure", *args
     system "make"
@@ -147,25 +145,6 @@ class Php < Formula
       pm.max_spare_servers = 3
       php_admin_value[xdebug.remote_autostart]=1
     EOCONF
-  end
-
-  def install_xquartz
-    return if File.directory?("/opt/X11")
-    ohai "downloading xquartz"
-    Net::HTTP.start('xquartz.macosforge.org') {
-      |http|
-      resp = http.get("/downloads/SL/XQuartz-2.7.4.dmg")
-      open("/tmp/xquartz.dmg", "wb") {
-        |file|
-        file.write(resp.body)
-      }
-    }
-    ohai "installing xquartz"
-    `hdiutil attach /tmp/xquartz.dmg`
-    `sudo /usr/sbin/installer -pkg /Volumes/XQuartz-2.7.4/XQuartz.pkg -target /`
-    ohai "cleaning up xquartz"
-    `hdituil detach /Volumes/XQuartz-2.7.4`
-    `rm -fR /tmp/xquartz.dmg`
   end
 
   def install_imagick
