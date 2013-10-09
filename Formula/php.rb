@@ -28,6 +28,7 @@ class Php < Formula
       "--sysconfdir=#{etc}",
       "--with-config-file-path=#{etc}",
       "--with-iconv-dir=/usr",
+      "--enable-maintainer-zts",
       "--enable-exif",
       "--enable-soap",
       "--enable-wddx",
