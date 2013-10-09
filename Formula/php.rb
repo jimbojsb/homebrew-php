@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us3.php.net/get/php-5.4.17.tar.gz/from/this/mirror'
   sha1 '8d9a95a226a9fe21cf74142c8df794509e4ac605'
   homepage 'http://php.net/'
-  version '5.4.17.01'
+  version '5.4.17.02'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
