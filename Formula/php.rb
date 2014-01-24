@@ -2,10 +2,10 @@ require 'formula'
 require 'net/http'
 
 class Php < Formula
-  url 'http://us3.php.net/get/php-5.4.17.tar.gz/from/this/mirror'
-  sha1 '8d9a95a226a9fe21cf74142c8df794509e4ac605'
+  url 'http://us2.php.net/get/php-5.4.24.tar.gz/from/this/mirror'
+  sha1 'b9382f0b93f0f62ab0d70f08f6f9a156aa04e122'
   homepage 'http://php.net/'
-  version '5.4.17.04'
+  version '5.4.24.01'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
