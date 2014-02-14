@@ -74,6 +74,7 @@ class Php < Formula
     args = install_args
     system "./configure", *args
     system "make"
+    ENV.deparallelize
     system "make install"
 
     etc.install "./php.ini-development" => "php.ini"
