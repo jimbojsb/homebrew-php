@@ -84,7 +84,6 @@ class Php < Formula
 
     install_xdebug
     install_markdown
-    install_aop
     install_imagick
     install_composer
     install_mongo
@@ -163,14 +162,6 @@ class Php < Formula
     inreplace (etc+"php.ini") do |s|
       s << "extension=mongo.so\n"
       s << "mongo.native_long=1\n"
-    end
-  end
-
-  def install_aop
-    ohai "installing aop"  
-    `#{bin}/pecl install aop-beta`
-    inreplace (etc+"php.ini") do |s|
-      s << "extension=aop.so\n"
     end
   end
 
