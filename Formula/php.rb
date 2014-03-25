@@ -82,14 +82,13 @@ class Php < Formula
     (etc+'php-fpm.conf').write php_fpm_conf
     (etc+'php-fpm.conf').chmod 0644
 
-    fix_conf
     `mkdir -p #{lib}/php/ext`
     install_xdebug
     install_markdown
     install_imagick
     install_mongo
     install_composer
-    
+    fix_conf
 
     `chmod -R 755 #{lib}`
 
@@ -178,7 +177,7 @@ class Php < Formula
     system "tar -zxvf xdebug-2.2.4.tgz"
     system "cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
     inreplace (etc+"php.ini") do |s|
-      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20100525/xdebug.so\n"
+      s << "zend_extension=#{lib}/php/ext/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
       s << "xdebug.remote_enable=1\n"
     end
