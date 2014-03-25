@@ -2,10 +2,10 @@ require 'formula'
 require 'net/http'
 
 class Php < Formula
-  url 'http://us2.php.net/get/php-5.4.24.tar.gz/from/this/mirror'
-  sha1 'b9382f0b93f0f62ab0d70f08f6f9a156aa04e122'
+  url 'http://us2.php.net/get/php-5.4.26.tar.gz/from/this/mirror'
+  sha256 'ec3f902b5e8cbdd660e01e784b537f1210a12182d9bbd62164776075bc097eca'
   homepage 'http://php.net/'
-  version '5.4.24.01'
+  version '5.4.26.02'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -21,6 +21,7 @@ class Php < Formula
   depends_on 'imagemagick'
   depends_on 'freetds' => 'enable-msdblib'
   depends_on 'pkg-config' => :build
+  depends_on 'wget' => :build
 
   def install_args
     args = [
@@ -80,14 +81,12 @@ class Php < Formula
     etc.install "./php.ini-development" => "php.ini"
     (etc+'php-fpm.conf').write php_fpm_conf
     (etc+'php-fpm.conf').chmod 0644
-    plist_path.write php_fpm_startup_plist
-    plist_path.chmod 0644
 
     install_xdebug
     install_markdown
     install_imagick
-    install_composer
     install_mongo
+    install_composer
     fix_conf
 
     `chmod -R 755 #{lib}`
@@ -96,7 +95,7 @@ class Php < Formula
 
 
 
-  def php_fpm_startup_plist; <<-EOPLIST.undent
+  def plist; <<-EOPLIST.undent
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
       <plist version="1.0">
@@ -136,22 +135,15 @@ class Php < Formula
       pm.start_servers = 2
       pm.min_spare_servers = 1
       pm.max_spare_servers = 3
-
-      [www-debug]
-      user = #{`whoami`.chomp}
-      listen = /tmp/php-fpm-debug.sock
-      pm = dynamic
-      pm.max_children = 5
-      pm.start_servers = 2
-      pm.min_spare_servers = 1
-      pm.max_spare_servers = 3
-      php_admin_value[xdebug.remote_autostart]=1
+      catch_workers_output = yes
     EOCONF
   end
 
   def install_imagick
     ohai "installing imagick"  
-    `yes | #{bin}/pecl install imagick-beta`
+    system "wget http://pecl.php.net/get/imagick-3.1.2.tgz"
+    system "tar -zxvf imagick-3.1.2.tgz"
+    system "cd imagick-3.1.2 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/extensions/no-debug-non-zts-20100525/imagick.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=imagick.so\n"
     end
@@ -159,7 +151,9 @@ class Php < Formula
 
   def install_mongo
     ohai "installing mongo"  
-    `#{bin}/pecl install mongo`
+    system "wget http://pecl.php.net/get/mongo-1.4.5.tgz"
+    system "tar -zxvf mongo-1.4.5.tgz"
+    system "cd mongo-1.4.5 && #{bin}/phpize && ./configure && make && cp modules/mongo.so #{lib}/php/extensions/no-debug-non-zts-20100525/mongo.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=mongo.so\n"
       s << "mongo.native_long=1\n"
@@ -167,8 +161,10 @@ class Php < Formula
   end
 
   def install_markdown
-    ohai "installing markdown"  
-    `#{bin}/pecl install markdown`
+    ohai "installing markdown" 
+    system "wget http://pecl.php.net/get/markdown-1.0.0.tgz"
+    system "tar -zxvf markdown-1.0.0.tgz"
+    system "cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/extensions/no-debug-non-zts-20100525/discount.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=discount.so\n"
     end
@@ -176,15 +172,13 @@ class Php < Formula
 
   def install_xdebug
     ohai "installing xdebug"
-    `#{bin}/pecl install xdebug`
+    system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
+    system "tar -zxvf xdebug-2.2.4.tgz"
+    system "cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/extensions/no-debug-non-zts-20100525/xdebug.so"
     inreplace (etc+"php.ini") do |s|
       s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20100525/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
       s << "xdebug.remote_enable=1\n"
-    end
-    inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
-      s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
     end
   end
 
