@@ -82,12 +82,14 @@ class Php < Formula
     (etc+'php-fpm.conf').write php_fpm_conf
     (etc+'php-fpm.conf').chmod 0644
 
+    fix_conf
+    `mkdir -p #{lib}/php/ext`
     install_xdebug
     install_markdown
     install_imagick
     install_mongo
     install_composer
-    fix_conf
+    
 
     `chmod -R 755 #{lib}`
 
@@ -189,6 +191,7 @@ class Php < Formula
       s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
       s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRECATED | E_STRICT)"
       s.gsub! "memory_limit = 128M", "memory_limit = 512M"
+      s.gsub! "; extension_dir = \"ext\"", "extension_dir = \"#{lib}/php/ext\""
     end
     `cp #{etc}/php.ini #{etc}/php-cli.ini`
     inreplace (etc+"php-cli.ini") do |s|
