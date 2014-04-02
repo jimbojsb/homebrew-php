@@ -182,7 +182,7 @@ class Php55 < Formula
     ohai "installing xdebug"
     system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
     system "tar -zxvf xdebug-2.2.4.tgz"
-    Dir.chrdir "xdebug-2.2.4"
+    Dir.chdir "xdebug-2.2.4"
     safe_phpize
     system "./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
     inreplace (etc+"php.ini") do |s|
