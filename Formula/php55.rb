@@ -94,7 +94,14 @@ class Php55 < Formula
 
   end
 
+  def safe_phpize
+     cmd = ''
+     cmd << "PHP_AUTOCONF=\"#{Formula['autoconf'].opt_prefix}/bin/autoconf\" "
+     cmd << "PHP_AUTOHEADER=\"#{Formula['autoconf'].opt_prefix}/bin/autoheader\" "
+     cmd << phpize
 
+     system cmd
+   end
 
   def plist; <<-EOPLIST.undent
       <?xml version="1.0" encoding="UTF-8"?>
@@ -173,9 +180,11 @@ class Php55 < Formula
 
   def install_xdebug
     ohai "installing xdebug"
-    `wget http://pecl.php.net/get/xdebug-2.2.4.tgz`
-    `tar -zxvf xdebug-2.2.4.tgz`
-    `cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so`
+    system "get http://pecl.php.net/get/xdebug-2.2.4.tgz"
+    system "tar -zxvf xdebug-2.2.4.tgz"
+    Dir.chrdir "xdebug-2.2.4"
+    safe_phpize
+    system "./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
     inreplace (etc+"php.ini") do |s|
       s << "zend_extension=#{lib}/php/ext/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
