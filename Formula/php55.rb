@@ -84,10 +84,10 @@ class Php55 < Formula
 
     `mkdir -p #{lib}/php/ext`
     install_xdebug
-    install_markdown
-    install_imagick
-    install_mongo
-    install_composer
+    #install_markdown
+    #install_imagick
+    #install_mongo
+    #install_composer
     fix_conf
 
     `chmod -R 755 #{lib}`
@@ -173,9 +173,9 @@ class Php55 < Formula
 
   def install_xdebug
     ohai "installing xdebug"
-    system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
-    system "tar -zxvf xdebug-2.2.4.tgz"
-    system "cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
+    `wget http://pecl.php.net/get/xdebug-2.2.4.tgz`
+    `tar -zxvf xdebug-2.2.4.tgz`
+    `cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so`
     inreplace (etc+"php.ini") do |s|
       s << "zend_extension=#{lib}/php/ext/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
