@@ -1,11 +1,11 @@
 require 'formula'
 require 'net/http'
 
-class Php55 < Formula
-  url 'http://us2.php.net/get/php-5.5.1.tar.gz/from/us1.php.net/mirror'
-  sha1 '401978b63c9900b8b33e1b70ee2c162e636dbf42'
+class Php < Formula
+  url 'http://us2.php.net/get/php-5.5.10.tar.gz/from/this/mirror'
+  sha256 'abf751810593844e0897007797210828b193a213d9b204f203e0331019cadb90'
   homepage 'http://php.net/'
-  version '5.5.1.01'
+  version '5.4.26.02'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -19,8 +19,9 @@ class Php55 < Formula
   depends_on 'libvpx'
   depends_on 'autoconf'
   depends_on 'imagemagick'
-  depends_on 'wget'
+  depends_on 'freetds' => 'enable-msdblib'
   depends_on 'pkg-config' => :build
+  depends_on 'wget' => :build
 
   def install_args
     args = [
@@ -45,6 +46,7 @@ class Php55 < Formula
       "--with-xmlrpc",
       "--with-mysqli=mysqlnd",
       "--with-mysql=mysqlnd",
+      "--with-mssql",
       "--with-pdo-mysql=mysqlnd",
       "--with-curl=#{Formula.factory('curl').opt_prefix}",
       "--enable-fpm",
@@ -70,32 +72,31 @@ class Php55 < Formula
     File.delete(etc+"php-fpm.conf") rescue nil
     `rm -fR #{HOMEBREW_PREFIX}/lib/php`
 
-    install_xquartz
-
     args = install_args
     system "./configure", *args
     system "make"
+    ENV.deparallelize
     system "make install"
 
     etc.install "./php.ini-development" => "php.ini"
     (etc+'php-fpm.conf').write php_fpm_conf
     (etc+'php-fpm.conf').chmod 0644
-    plist_path.write php_fpm_startup_plist
-    plist_path.chmod 0644
-   
-    system "chmod -R 755 #{lib}"
 
-  end
-
-  def post_install
-    install_extensions
-    set_ini_defaults
+    `mkdir -p #{lib}/php/ext`
+    install_xdebug
+    install_markdown
+    install_imagick
+    install_mongo
     install_composer
+    fix_conf
+
+    `chmod -R 755 #{lib}`
+
   end
 
 
 
-  def php_fpm_startup_plist; <<-EOPLIST.undent
+  def plist; <<-EOPLIST.undent
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
       <plist version="1.0">
@@ -135,81 +136,67 @@ class Php55 < Formula
       pm.start_servers = 2
       pm.min_spare_servers = 1
       pm.max_spare_servers = 3
-
-      [www-debug]
-      user = #{`whoami`.chomp}
-      listen = /tmp/php-fpm-debug.sock
-      pm = dynamic
-      pm.max_children = 5
-      pm.start_servers = 2
-      pm.min_spare_servers = 1
-      pm.max_spare_servers = 3
-      php_admin_value[xdebug.remote_autostart]=1
+      catch_workers_output = yes
     EOCONF
   end
 
-  def install_xquartz
-    return if File.directory?("/opt/X11")
-    ohai "downloading xquartz"
-    Net::HTTP.start('xquartz.macosforge.org') {
-      |http|
-      resp = http.get("/downloads/SL/XQuartz-2.7.4.dmg")
-      open("/tmp/xquartz.dmg", "wb") {
-        |file|
-        file.write(resp.body)
-      }
-    }
-    ohai "installing xquartz"
-    `hdiutil attach /tmp/xquartz.dmg`
-    `sudo /usr/sbin/installer -pkg /Volumes/XQuartz-2.7.4/XQuartz.pkg -target /`
-    ohai "cleaning up xquartz"
-    `hdituil detach /Volumes/XQuartz-2.7.4`
-    `rm -fR /tmp/xquartz.dmg`
-  end
-
-  def install_extensions
-    ohai "installing aop"  
-    system "wget http://pecl.php.net/get/AOP-0.2.2b1.tgz && tar -zxvf AOP-0.2.2b1.tgz && cd AOP-0.2.2b1 && #{bin}/phpize && ./configure && make && cp modules/aop.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR AOP-0.2.2b1*"
-
-    ohai "installing mongo"  
-    system "wget http://pecl.php.net/get/mongo-1.4.1.tgz && tar -zxvf mongo-1.4.1.tgz && cd mongo-1.4.1 && #{bin}/phpize && ./configure && make && cp modules/mongo.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR mongo-1.4.1*"
-
-    ohai "installing markdown"  
-    system "wget http://pecl.php.net/get/markdown-1.0.0.tgz && tar -zxvf markdown-1.0.0.tgz && cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR markdown-1.0.0*"
-
-    ohai "installing imagick"
-    system "wget http://pecl.php.net/get/imagick-3.1.0RC2.tgz && tar -zxvf imagick-3.1.0RC2.tgz && cd imagick-3.1.0RC2 && sed -i '' 's/include\\/ImageMagick/include\\/ImageMagick-6/' config.m4 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR imagick-3.1.0RC2*"
-
-    ohai "installing xdebug"
-    system "wget http://pecl.php.net/get/xdebug-2.2.3.tgz && tar -zxvf xdebug-2.2.3.tgz && cd xdebug-2.2.3 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/extensions/no-debug-non-zts-20121212 && cd ../ && rm -fR xdebug-2.2.3*"
-
-    inreplace (File.expand_path("~")+"/.bash_profile") do |s|
-      s.gsub! "alias phpd=\"php -d xdebug.remote_autostart=1\"\n", "" rescue nil
-      s << "alias phpd=\"php -d xdebug.remote_autostart=1\"\n"
-    end
-  end
-
-  def set_ini_defaults
+  def install_imagick
+    ohai "installing imagick"  
+    system "wget http://pecl.php.net/get/imagick-3.1.2.tgz"
+    system "tar -zxvf imagick-3.1.2.tgz"
+    system "cd imagick-3.1.2 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/ext/imagick.so"
     inreplace (etc+"php.ini") do |s|
-      ohai "setting defaults"
-      s.gsub! "short_open_tag = Off", "short_open_tag = On"
-      s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
-      s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRACATED | E_STRICT)"
-      s.gsub! "memory_limit = 128M", "memory_limit = 512M"
-      s << "mongo.native_long=1\n"
-      s << "zend_extension=#{lib}/php/extensions/no-debug-non-zts-20121212/xdebug.so\n"
-      s << "xdebug.remote_host=localhost\n"
-      s << "xdebug.remote_enable=1\n"
-      s << "extension=aop.so\n"
-      s << "extension=mongo.so\n"
-      s << "extension=discount.so\n"
       s << "extension=imagick.so\n"
     end
+  end
 
-    system "cp #{etc}/php.ini #{etc}/php-cli.ini"
+  def install_mongo
+    ohai "installing mongo"  
+    system "wget http://pecl.php.net/get/mongo-1.4.5.tgz"
+    system "tar -zxvf mongo-1.4.5.tgz"
+    system "cd mongo-1.4.5 && #{bin}/phpize && ./configure && make && cp modules/mongo.so #{lib}/php/ext/mongo.so"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=mongo.so\n"
+      s << "mongo.native_long=1\n"
+    end
+  end
+
+  def install_markdown
+    ohai "installing markdown" 
+    system "wget http://pecl.php.net/get/markdown-1.0.0.tgz"
+    system "tar -zxvf markdown-1.0.0.tgz"
+    system "cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/ext/discount.so"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=discount.so\n"
+    end
+  end 
+
+  def install_xdebug
+    ohai "installing xdebug"
+    system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
+    system "tar -zxvf xdebug-2.2.4.tgz"
+    system "cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
+    inreplace (etc+"php.ini") do |s|
+      s << "zend_extension=#{lib}/php/ext/xdebug.so\n"
+      s << "xdebug.remote_host=localhost\n"
+      s << "xdebug.remote_enable=1\n"
+    end
+  end
+
+
+  def fix_conf
+    inreplace (etc+"php.ini") do |s|
+      s.gsub! "short_open_tag = Off", "short_open_tag = On"
+      s.gsub! ";date.timezone =", "date.timezone = America/Chicago"
+      s.gsub! "error_reporting = E_ALL", "error_reporting = E_ALL & ~(E_NOTICE | E_DEPRECATED | E_STRICT)"
+      s.gsub! "memory_limit = 128M", "memory_limit = 512M"
+      s.gsub! "; extension_dir = \"ext\"", "extension_dir = \"#{lib}/php/ext\""
+    end
+    `cp #{etc}/php.ini #{etc}/php-cli.ini`
     inreplace (etc+"php-cli.ini") do |s|
       s.gsub! "memory_limit = 512", "memory_limit = -1"
     end
+
   end
 
   def install_composer
