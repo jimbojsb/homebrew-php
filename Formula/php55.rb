@@ -98,7 +98,7 @@ class Php55 < Formula
      cmd = ''
      cmd << "PHP_AUTOCONF=\"#{Formula['autoconf'].opt_prefix}/bin/autoconf\" "
      cmd << "PHP_AUTOHEADER=\"#{Formula['autoconf'].opt_prefix}/bin/autoheader\" "
-     cmd << phpize
+     cmd << "#{bin}/phpize"
 
      system cmd
    end
