@@ -180,7 +180,7 @@ class Php55 < Formula
 
   def install_xdebug
     ohai "installing xdebug"
-    system "get http://pecl.php.net/get/xdebug-2.2.4.tgz"
+    system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
     system "tar -zxvf xdebug-2.2.4.tgz"
     Dir.chrdir "xdebug-2.2.4"
     safe_phpize
