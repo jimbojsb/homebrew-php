@@ -84,10 +84,10 @@ class Php55 < Formula
 
     `mkdir -p #{lib}/php/ext`
     install_xdebug
-    #install_markdown
-    #install_imagick
-    #install_mongo
-    #install_composer
+    install_markdown
+    install_imagick
+    install_mongo
+    install_composer
     fix_conf
 
     `chmod -R 755 #{lib}`
@@ -151,7 +151,8 @@ class Php55 < Formula
     ohai "installing imagick"  
     system "wget http://pecl.php.net/get/imagick-3.1.2.tgz"
     system "tar -zxvf imagick-3.1.2.tgz"
-    system "cd imagick-3.1.2 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/ext/imagick.so"
+    Dir.chdir "imagick-3.1.2"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/imagick.so #{lib}/php/ext/imagick.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=imagick.so\n"
     end
@@ -161,7 +162,8 @@ class Php55 < Formula
     ohai "installing mongo"  
     system "wget http://pecl.php.net/get/mongo-1.4.5.tgz"
     system "tar -zxvf mongo-1.4.5.tgz"
-    system "cd mongo-1.4.5 && #{bin}/phpize && ./configure && make && cp modules/mongo.so #{lib}/php/ext/mongo.so"
+    Dir.chdir "mongo-1.4.5"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/mongo.so #{lib}/php/ext/mongo.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=mongo.so\n"
       s << "mongo.native_long=1\n"
@@ -172,7 +174,8 @@ class Php55 < Formula
     ohai "installing markdown" 
     system "wget http://pecl.php.net/get/markdown-1.0.0.tgz"
     system "tar -zxvf markdown-1.0.0.tgz"
-    system "cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/ext/discount.so"
+    Dir.chdir "markdown-1.0.0"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/discount.so #{lib}/php/ext/discount.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=discount.so\n"
     end
