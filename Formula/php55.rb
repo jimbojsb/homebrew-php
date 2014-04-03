@@ -183,8 +183,7 @@ class Php55 < Formula
     system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
     system "tar -zxvf xdebug-2.2.4.tgz"
     Dir.chdir "xdebug-2.2.4"
-    safe_phpize
-    system "./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
+    system "PATH=#{bin}:$PATH phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
     inreplace (etc+"php.ini") do |s|
       s << "zend_extension=#{lib}/php/ext/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
