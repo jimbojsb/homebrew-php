@@ -96,8 +96,8 @@ class Php55 < Formula
 
   def safe_phpize
      cmd = ''
-     cmd << "PHP_AUTOCONF=\"#{Formula['autoconf'].opt_prefix}/bin/autoconf\" "
-     cmd << "PHP_AUTOHEADER=\"#{Formula['autoconf'].opt_prefix}/bin/autoheader\" "
+     cmd << "PHP_AUTOCONF=\"#{Formula.factory('autoconf').opt_prefix}/bin/autoconf\" "
+     cmd << "PHP_AUTOHEADER=\"#{Formula.factory('autoconf').opt_prefix}/bin/autoheader\" "
      cmd << "#{bin}/phpize"
 
      system cmd
