@@ -5,7 +5,7 @@ class Php < Formula
   url 'http://us2.php.net/get/php-5.4.26.tar.gz/from/this/mirror'
   sha256 'ec3f902b5e8cbdd660e01e784b537f1210a12182d9bbd62164776075bc097eca'
   homepage 'http://php.net/'
-  version '5.4.26.02'
+  version '5.4.26.03'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -36,6 +36,7 @@ class Php < Formula
       "--enable-ftp",
       "--enable-sockets",
       "--with-bz2",
+      "--with-mcrypt",
       "--enable-zip",
       "--enable-pcntl",
       "--enable-mbstring",
