@@ -16,6 +16,7 @@ class Php < Formula
   depends_on 'freetype'
   depends_on 'imap-uw'
   depends_on 'curl'
+  depends_on 'mcrypt'
   depends_on 'libvpx'
   depends_on 'autoconf'
   depends_on 'imagemagick'
