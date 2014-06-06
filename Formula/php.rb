@@ -1,5 +1,4 @@
 require 'formula'
-require 'net/http'
 
 class Php < Formula
   url 'http://us2.php.net/get/php-5.4.26.tar.gz/from/this/mirror'
@@ -7,9 +6,7 @@ class Php < Formula
   homepage 'http://php.net/'
   version '5.4.26.03'
 
-  # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
-  depends_on 'libxml2'
   depends_on 'homebrew/dupes/zlib'
   depends_on 'jpeg'
   depends_on 'libpng'
@@ -52,7 +49,7 @@ class Php < Formula
       "--with-pdo-mysql=mysqlnd",
       "--with-curl=#{Formula['curl'].opt_prefix}",
       "--enable-fpm",
-      "--with-openssl=" + Formula['openssl'].opt_prefix.to_s,
+      "--with-openssl=#{Formula['openssl'].opt_prefix}",
       "--with-imap=#{Formula['imap-uw'].opt_prefix}",
       "--with-imap-ssl=#{Formula['imap-uw'].opt_prefix}",
       "--with-kerberos",
@@ -68,7 +65,8 @@ class Php < Formula
   end
 
   def install
-
+    ohai "here"
+    return
     File.delete(etc+"php.ini") rescue nil
     File.delete(etc+"php-cli.ini") rescue nil
     File.delete(etc+"php-fpm.conf") rescue nil
