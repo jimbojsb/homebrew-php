@@ -18,7 +18,7 @@ class Php < Formula
   depends_on 'curl'
   depends_on 'mcrypt'
   depends_on 'libvpx'
-  depends_on 'autoconf'
+  depends_on 'autoconf' => :build
   depends_on 'imagemagick'
   depends_on 'freetds' => 'enable-msdblib'
   depends_on 'pkg-config' => :build
@@ -44,24 +44,24 @@ class Php < Formula
       "--enable-mbregex",
       "--enable-bcmath",
       "--enable-calendar",
-      "--with-zlib=#{Formula.factory('homebrew/dupes/zlib').opt_prefix}",
+      "--with-zlib=#{Formula['homebrew/dupes/zlib'].opt_prefix}",
       "--with-xmlrpc",
       "--with-mysqli=mysqlnd",
       "--with-mysql=mysqlnd",
       "--with-mssql",
       "--with-pdo-mysql=mysqlnd",
-      "--with-curl=#{Formula.factory('curl').opt_prefix}",
+      "--with-curl=#{Formula['curl'].opt_prefix}",
       "--enable-fpm",
-      "--with-openssl=" + Formula.factory('openssl').opt_prefix.to_s,
-      "--with-imap=#{Formula.factory('imap-uw').opt_prefix}",
-      "--with-imap-ssl=#{Formula.factory('imap-uw').opt_prefix}",
+      "--with-openssl=" + Formula['openssl'].opt_prefix.to_s,
+      "--with-imap=#{Formula['imap-uw'].opt_prefix}",
+      "--with-imap-ssl=#{Formula['imap-uw'].opt_prefix}",
       "--with-kerberos",
       "--with-kerberos=/usr",
       "--with-gd",
       "--enable-gd-native-ttf",
-      "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
-      "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
-      "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
+      "--with-freetype-dir=#{Formula['freetype'].opt_prefix}",
+      "--with-jpeg-dir=#{Formula['jpeg'].opt_prefix}",
+      "--with-png-dir=#{Formula['libpng'].opt_prefix}",
       "--mandir=#{man}"
     ]
     args
