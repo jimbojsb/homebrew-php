@@ -1,5 +1,4 @@
 require 'formula'
-require 'net/http'
 
 class Php55 < Formula
   url 'http://us2.php.net/get/php-5.5.13.tar.gz/from/this/mirror'
