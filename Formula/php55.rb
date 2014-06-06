@@ -9,7 +9,6 @@ class Php55 < Formula
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
-  depends_on 'libxml2'
   depends_on 'homebrew/dupes/zlib'
   depends_on 'jpeg'
   depends_on 'libpng'
@@ -43,25 +42,25 @@ class Php55 < Formula
       "--enable-mbregex",
       "--enable-bcmath",
       "--enable-calendar",
-      "--with-zlib=#{Formula.factory('homebrew/dupes/zlib').opt_prefix}",
+      "--with-zlib=#{Formula['homebrew/dupes/zlib'].opt_prefix}",
       "--with-xmlrpc",
       "--with-mysqli=mysqlnd",
       "--with-mysql=mysqlnd",
       "--with-mcrypt",
       "--with-mssql",
       "--with-pdo-mysql=mysqlnd",
-      "--with-curl=#{Formula.factory('curl').opt_prefix}",
+      "--with-curl=#{Formula['curl'].opt_prefix}",
       "--enable-fpm",
-      "--with-openssl=" + Formula.factory('openssl').opt_prefix.to_s,
-      "--with-imap=#{Formula.factory('imap-uw').opt_prefix}",
-      "--with-imap-ssl=#{Formula.factory('imap-uw').opt_prefix}",
+      "--with-openssl=#{Formula.factory('openssl').opt_prefix}",
+      "--with-imap=#{Formula['imap-uw'].opt_prefix}",
+      "--with-imap-ssl=#{Formula['imap-uw'].opt_prefix}",
       "--with-kerberos",
       "--with-kerberos=/usr",
       "--with-gd",
       "--enable-gd-native-ttf",
-      "--with-freetype-dir=#{Formula.factory('freetype').opt_prefix}",
-      "--with-jpeg-dir=#{Formula.factory('jpeg').opt_prefix}",
-      "--with-png-dir=#{Formula.factory('libpng').opt_prefix}",
+      "--with-freetype-dir=#{Formula['freetype'].opt_prefix}",
+      "--with-jpeg-dir=#{Formula['jpeg'].opt_prefix}",
+      "--with-png-dir=#{Formula['libpng'].opt_prefix}",
       "--mandir=#{man}"
     ]
     args
