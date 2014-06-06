@@ -17,7 +17,7 @@ class Php55 < Formula
   depends_on 'curl'
   depends_on 'mcrypt'
   depends_on 'libvpx'
-  depends_on 'autoconf'
+  depends_on 'autoconf' => :build
   depends_on 'imagemagick'
   depends_on 'freetds' => 'enable-msdblib'
   depends_on 'pkg-config' => :build
