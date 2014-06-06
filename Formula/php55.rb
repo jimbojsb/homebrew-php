@@ -51,7 +51,7 @@ class Php55 < Formula
       "--with-pdo-mysql=mysqlnd",
       "--with-curl=#{Formula['curl'].opt_prefix}",
       "--enable-fpm",
-      "--with-openssl=#{Formula.factory('openssl').opt_prefix}",
+      "--with-openssl=#{Formula['openssl'].opt_prefix}",
       "--with-imap=#{Formula['imap-uw'].opt_prefix}",
       "--with-imap-ssl=#{Formula['imap-uw'].opt_prefix}",
       "--with-kerberos",
