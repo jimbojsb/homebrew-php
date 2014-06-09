@@ -131,6 +131,7 @@ class Php < Formula
       [www]
       user = #{`whoami`.chomp}
       listen = /tmp/php-fpm.sock
+      listen.mode=0666
       pm = dynamic
       pm.max_children = 5
       pm.start_servers = 2
