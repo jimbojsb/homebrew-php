@@ -6,6 +6,7 @@ class Php < Formula
   homepage 'http://php.net/'
   version '5.6.0.1'
 
+  # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
   depends_on 'homebrew/dupes/zlib'
   depends_on 'jpeg'
@@ -34,7 +35,6 @@ class Php < Formula
       "--enable-ftp",
       "--enable-sockets",
       "--with-bz2",
-      "--with-mcrypt",
       "--enable-zip",
       "--enable-pcntl",
       "--enable-mbstring",
@@ -45,6 +45,7 @@ class Php < Formula
       "--with-xmlrpc",
       "--with-mysqli=mysqlnd",
       "--with-mysql=mysqlnd",
+      "--with-mcrypt",
       "--with-mssql",
       "--with-pdo-mysql=mysqlnd",
       "--with-curl=#{Formula['curl'].opt_prefix}",
@@ -65,8 +66,7 @@ class Php < Formula
   end
 
   def install
-    ohai "here"
-    return
+
     File.delete(etc+"php.ini") rescue nil
     File.delete(etc+"php-cli.ini") rescue nil
     File.delete(etc+"php-fpm.conf") rescue nil
@@ -94,7 +94,14 @@ class Php < Formula
 
   end
 
+  def safe_phpize
+     cmd = ''
+     cmd << "PHP_AUTOCONF=\"#{Formula.factory('autoconf').opt_prefix}/bin/autoconf\" "
+     cmd << "PHP_AUTOHEADER=\"#{Formula.factory('autoconf').opt_prefix}/bin/autoheader\" "
+     cmd << "#{bin}/phpize"
 
+     system cmd
+   end
 
   def plist; <<-EOPLIST.undent
       <?xml version="1.0" encoding="UTF-8"?>
@@ -131,8 +138,8 @@ class Php < Formula
       [www]
       user = #{`whoami`.chomp}
       listen = /tmp/php-fpm.sock
-      listen.mode=0666
       pm = dynamic
+      listen.mode=0666
       pm.max_children = 5
       pm.start_servers = 2
       pm.min_spare_servers = 1
@@ -145,7 +152,8 @@ class Php < Formula
     ohai "installing imagick"  
     system "wget http://pecl.php.net/get/imagick-3.1.2.tgz"
     system "tar -zxvf imagick-3.1.2.tgz"
-    system "cd imagick-3.1.2 && #{bin}/phpize && ./configure && make && cp modules/imagick.so #{lib}/php/ext/imagick.so"
+    Dir.chdir "imagick-3.1.2"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/imagick.so #{lib}/php/ext/imagick.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=imagick.so\n"
     end
@@ -155,7 +163,8 @@ class Php < Formula
     ohai "installing mongo"  
     system "wget http://pecl.php.net/get/mongo-1.4.5.tgz"
     system "tar -zxvf mongo-1.4.5.tgz"
-    system "cd mongo-1.4.5 && #{bin}/phpize && ./configure && make && cp modules/mongo.so #{lib}/php/ext/mongo.so"
+    Dir.chdir "mongo-1.4.5"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/mongo.so #{lib}/php/ext/mongo.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=mongo.so\n"
       s << "mongo.native_long=1\n"
@@ -166,7 +175,8 @@ class Php < Formula
     ohai "installing markdown" 
     system "wget http://pecl.php.net/get/markdown-1.0.0.tgz"
     system "tar -zxvf markdown-1.0.0.tgz"
-    system "cd markdown-1.0.0 && #{bin}/phpize && ./configure && make && cp modules/discount.so #{lib}/php/ext/discount.so"
+    Dir.chdir "markdown-1.0.0"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/discount.so #{lib}/php/ext/discount.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=discount.so\n"
     end
@@ -176,7 +186,8 @@ class Php < Formula
     ohai "installing xdebug"
     system "wget http://pecl.php.net/get/xdebug-2.2.4.tgz"
     system "tar -zxvf xdebug-2.2.4.tgz"
-    system "cd xdebug-2.2.4 && #{bin}/phpize && ./configure && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
+    Dir.chdir "xdebug-2.2.4"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/xdebug.so #{lib}/php/ext/xdebug.so"
     inreplace (etc+"php.ini") do |s|
       s << "zend_extension=#{lib}/php/ext/xdebug.so\n"
       s << "xdebug.remote_host=localhost\n"
