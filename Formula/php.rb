@@ -1,10 +1,10 @@
 require 'formula'
 
 class Php < Formula
-  url 'http://us2.php.net/get/php-5.4.26.tar.gz/from/this/mirror'
-  sha256 'ec3f902b5e8cbdd660e01e784b537f1210a12182d9bbd62164776075bc097eca'
+  url 'http://us1.php.net/get/php-5.6.0.tar.gz/from/this/mirror'
+  sha256 '284b85376c630a6a7163e5278d64b8526fa1324fe5fd5d21174b54e2c056533f'
   homepage 'http://php.net/'
-  version '5.4.26.03'
+  version '5.6.0.1'
 
   depends_on 'openssl'
   depends_on 'homebrew/dupes/zlib'
