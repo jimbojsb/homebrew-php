@@ -4,7 +4,7 @@ class Php < Formula
   url 'http://us1.php.net/get/php-5.6.0.tar.gz/from/this/mirror'
   sha256 '284b85376c630a6a7163e5278d64b8526fa1324fe5fd5d21174b54e2c056533f'
   homepage 'http://php.net/'
-  version '5.6.0.1'
+  version '5.6.0.2'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
