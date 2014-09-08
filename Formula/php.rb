@@ -111,7 +111,7 @@ class Php < Formula
         <key>KeepAlive</key>
         <true/>
         <key>Label</key>
-        <string>homebrew.mcxl.php</string>
+        <string>homebrew.mxcl.php</string>
         <key>ProgramArguments</key>
         <array>
           <string>#{sbin}/php-fpm</string>
