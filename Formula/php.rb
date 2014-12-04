@@ -1,10 +1,10 @@
 require 'formula'
 
 class Php < Formula
-  url 'http://us1.php.net/get/php-5.6.0.tar.gz/from/this/mirror'
-  sha256 '284b85376c630a6a7163e5278d64b8526fa1324fe5fd5d21174b54e2c056533f'
+  url 'http://php.net/get/php-5.6.3.tar.gz/from/this/mirror'
+  sha256 '7ac79fe7ef50c2d5893375f5d8854909337adf1632e42bb08b36b66a0d8016a7'
   homepage 'http://php.net/'
-  version '5.6.0.2'
+  version '5.6.3.0'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -16,6 +16,7 @@ class Php < Formula
   depends_on 'curl'
   depends_on 'mcrypt'
   depends_on 'libvpx'
+  depends_on 'libevent'
   depends_on 'autoconf' => :build
   depends_on 'imagemagick'
   depends_on 'freetds' => 'enable-msdblib'
@@ -88,6 +89,7 @@ class Php < Formula
     install_imagick
     install_mongo
     install_composer
+    install_memcached
     fix_conf
 
     `chmod -R 755 #{lib}`
@@ -179,6 +181,17 @@ class Php < Formula
     system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/discount.so #{lib}/php/ext/discount.so"
     inreplace (etc+"php.ini") do |s|
       s << "extension=discount.so\n"
+    end
+  end
+  
+  def install_memcached
+    ohai "installing memcached" 
+    system "wget http://pecl.php.net/get/memcached-2.2.0.tgz"
+    system "tar -zxvf memcached-2.2.0.tgz"
+    Dir.chdir "memcached-2.2.0"
+    system "#{bin}/phpize && ./configure --with-php-config=#{bin}/php-config && make && cp modules/memcached.so #{lib}/php/ext/memcached.so"
+    inreplace (etc+"php.ini") do |s|
+      s << "extension=memcached.so\n"
     end
   end 
 
