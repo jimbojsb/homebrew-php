@@ -17,6 +17,7 @@ class Php < Formula
   depends_on 'mcrypt'
   depends_on 'libvpx'
   depends_on 'libevent'
+  depends_on 'libmemcached'
   depends_on 'autoconf' => :build
   depends_on 'imagemagick'
   depends_on 'freetds' => 'enable-msdblib'
