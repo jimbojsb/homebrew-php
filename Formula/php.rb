@@ -1,10 +1,10 @@
 require 'formula'
 
 class Php < Formula
-  url 'http://php.net/get/php-5.6.3.tar.gz/from/this/mirror'
-  sha256 '7ac79fe7ef50c2d5893375f5d8854909337adf1632e42bb08b36b66a0d8016a7'
+  url 'http://php.net/get/php-5.6.7.tar.gz/from/this/mirror'
+  sha256 '11398540a582c876f5e070207231afde975eb49bb2eeae20b052e8ca325c0f47'
   homepage 'http://php.net/'
-  version '5.6.3.0'
+  version '5.6.7.0'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
