@@ -1,10 +1,10 @@
 require 'formula'
 
 class Php < Formula
-  url 'http://php.net/get/php-5.6.7.tar.gz/from/this/mirror'
-  sha256 '11398540a582c876f5e070207231afde975eb49bb2eeae20b052e8ca325c0f47'
+  url 'http://php.net/get/php-5.6.11.tar.gz/from/this/mirror'
+  sha256 '85916b46c0d1f2a5315c84fb2773293f4084c3676ba4ed420d0432cbb60ff9d8'
   homepage 'http://php.net/'
-  version '5.6.7.0'
+  version '5.6.11.0'
 
   # Leopard requires Hombrew OpenSSL to build correctly
   depends_on 'openssl'
@@ -132,12 +132,12 @@ class Php < Formula
       </dict>
       </plist>
       EOPLIST
-  end 
+  end
 
   def php_fpm_conf; <<-EOCONF.undent
       [global]
       daemonize = no
-       
+
       [www]
       user = #{`whoami`.chomp}
       listen = /tmp/php-fpm.sock
@@ -152,7 +152,7 @@ class Php < Formula
   end
 
   def install_imagick
-    ohai "installing imagick"  
+    ohai "installing imagick"
     system "wget http://pecl.php.net/get/imagick-3.1.2.tgz"
     system "tar -zxvf imagick-3.1.2.tgz"
     Dir.chdir "imagick-3.1.2"
@@ -163,7 +163,7 @@ class Php < Formula
   end
 
   def install_mongo
-    ohai "installing mongo"  
+    ohai "installing mongo"
     system "wget http://pecl.php.net/get/mongo-1.4.5.tgz"
     system "tar -zxvf mongo-1.4.5.tgz"
     Dir.chdir "mongo-1.4.5"
@@ -175,7 +175,7 @@ class Php < Formula
   end
 
   def install_markdown
-    ohai "installing markdown" 
+    ohai "installing markdown"
     system "wget http://pecl.php.net/get/markdown-1.0.0.tgz"
     system "tar -zxvf markdown-1.0.0.tgz"
     Dir.chdir "markdown-1.0.0"
@@ -184,9 +184,9 @@ class Php < Formula
       s << "extension=discount.so\n"
     end
   end
-  
+
   def install_memcached
-    ohai "installing memcached" 
+    ohai "installing memcached"
     system "wget http://pecl.php.net/get/memcached-2.2.0.tgz"
     system "tar -zxvf memcached-2.2.0.tgz"
     Dir.chdir "memcached-2.2.0"
@@ -194,7 +194,7 @@ class Php < Formula
     inreplace (etc+"php.ini") do |s|
       s << "extension=memcached.so\n"
     end
-  end 
+  end
 
   def install_xdebug
     ohai "installing xdebug"
